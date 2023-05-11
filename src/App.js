@@ -1,16 +1,38 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import Loading from './components/Loading';
+import { connect } from 'react-redux';
+import { fetchCharacterInfo } from './Redux/actions';
 
 class App extends Component {
   state = {
-    isLoading: false,
-    fetched: false,
+    name: '',
+  };
+
+  onChangeInputText = ({ target }) => {
+    const { name, value } = target;
+    this.setState({ [name]: value });
+  };
+
+  onClickSearchCharacter = () => {
+    const { name } = this.state;
+    const { dispatch } = this.props;
+    dispatch(fetchCharacterInfo(name));
   };
 
   render() {
-    const { isLoading, fetched } = this.state;
+    const {
+      name,
+      born,
+      titles,
+      aliases,
+      tvSeries,
+      playedBy,
+      isLoading,
+      fetched,
+      errorMessage,
+    } = this.props;
 
-    if (isLoading) return <Loading />;
     return (
       <>
         <main>
@@ -19,25 +41,65 @@ class App extends Component {
               Search Game Of Thrones character:
               <input
                 type="text"
-                name="input-search"
+                name="name"
                 id="input-search"
                 placeholder="Ex.: Tyrion Lannister"
+                onChange={ this.onChangeInputText }
               />
             </label>
-            <button>Search</button>
+            <button
+              type="button"
+              onClick={ this.onClickSearchCharacter }
+            >
+              Search
+            </button>
           </form>
+
+          { isLoading && <Loading />}
 
           {
             fetched && (
               <section>
-                <p><strong>Name:</strong></p>
-                <p><strong>Born:</strong></p>
-                <p><strong>Titles:</strong></p>
-                <p><strong>Aliases:</strong></p>
-                <p><strong>Tv Series:</strong></p>
-                <p><strong>Played By:</strong></p>
+                <p><strong>Name:</strong>{' '}{name}</p>
+                <p><strong>Born:</strong>{' '}{born}</p>
+                <div>
+                  <strong>Titles:</strong>
+                  <ul>
+                    { titles.map((title) => (
+                      <li key={title}>{ title }</li>
+                    )) }
+                  </ul>
+                </div>
+                <div>
+                  <strong>Aliases:</strong>
+                  <ul>
+                    { aliases.map((aliase) => (
+                      <li key={aliase}>{ aliase }</li>
+                    )) }
+                  </ul>
+                </div>
+                <div>
+                  <strong>Tv Series:</strong>
+                  <ul>
+                    { tvSeries.map((tvSerie) => (
+                      <li key={tvSerie}>{ tvSerie }</li>
+                    )) }
+                  </ul>
+                </div>
+                <div>
+                  <strong>Played By:</strong>
+                  <ul>
+                    { playedBy.map((played) => (
+                      <li key={played}>{ played }</li>
+                    )) }
+                  </ul>
+                </div>
               </section>
             )
+          }
+
+          {
+            errorMessage && <strong>{ errorMessage }</strong>
           }
         </main>
       </>
@@ -45,4 +107,28 @@ class App extends Component {
   }
 };
 
-export default App;
+App.propTypes = {
+  name: PropTypes.string.isRequired,
+  born: PropTypes.string.isRequired,
+  titles: PropTypes.array.isRequired,
+  aliases: PropTypes.array.isRequired,
+  tvSeries: PropTypes.array.isRequired,
+  playedBy: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  fetched: PropTypes.bool.isRequired,
+  errorMessage: PropTypes.string.isRequired,
+};
+
+const mapStateToProps = ({ characterReducer }) => ({
+  name: characterReducer.name,
+  born: characterReducer.born,
+  titles: characterReducer.titles,
+  aliases: characterReducer.aliases,
+  tvSeries: characterReducer.tvSeries,
+  playedBy: characterReducer.playedBy,
+  isLoading: characterReducer.isLoading,
+  fetched: characterReducer.fetched,
+  errorMessage: characterReducer.errorMessage,
+});
+
+export default connect(mapStateToProps)(App);
