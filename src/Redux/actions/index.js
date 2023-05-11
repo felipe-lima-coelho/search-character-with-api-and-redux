@@ -18,10 +18,9 @@ const requestFailed = (error) => ({
   payload: error,
 });
 
-export const fetchCharacterInfo = () => async (dispatch, getState) => {
+export const fetchCharacterInfo = (name) => async (dispatch) => {
   dispatch(requestStarted());
   try {
-    const name = getState.characterReducer.name;
     const API_URL = `https://anapioficeandfire.com/api/characters?name=${name}`;
     const response = await fetch(API_URL);
     const data = await response.json();
